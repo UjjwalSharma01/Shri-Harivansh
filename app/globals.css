@@ -601,6 +601,42 @@ p { margin: 0; }
 }
 
 
+/* ── Text Alignment Toggle ── */
+
+.align-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.align-btn {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  color: var(--text-quaternary);
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+
+.align-btn:last-child {
+  border-right: none;
+}
+
+.align-btn:hover {
+  color: var(--text-secondary);
+  background: var(--accent-subtle);
+}
+
+.align-btn.active {
+  color: var(--accent);
+  background: var(--accent-medium);
+  font-weight: 600;
+}
+
 /* ── Verse Select ── */
 
 .verse-select {

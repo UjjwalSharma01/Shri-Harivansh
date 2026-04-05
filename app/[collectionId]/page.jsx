@@ -11,8 +11,12 @@ const storageKeys = {
   sectionId: 'shri-harivansh.sectionId',
   verseNumber: 'shri-harivansh.verseNumber',
   fontSize: 'shri-harivansh.fontSize',
-  darkMode: 'shri-harivansh.darkMode'
+  darkMode: 'shri-harivansh.darkMode',
+  textAlign: 'shri-harivansh.textAlign'
 };
+
+const ALIGN_OPTIONS = ['left', 'center', 'right'];
+const ALIGN_LABELS = { left: '⫷', center: '⫿', right: '⫸' };
 
 export default function ReaderPage() {
   const params = useParams();
@@ -34,6 +38,7 @@ export default function ReaderPage() {
   const [verseNumber, setVerseNumber] = useState(1);
   const [fontSize, setFontSize] = useState(20);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [textAlign, setTextAlign] = useState('left');
 
   useEffect(() => {
     let initialSectionId = collection.sections[0].id;
@@ -48,6 +53,7 @@ export default function ReaderPage() {
     setSectionId(initialSectionId);
     setVerseNumber(initialVerse);
     setFontSize(Number(localStorage.getItem(storageKeys.fontSize) || 20));
+    setTextAlign(localStorage.getItem(storageKeys.textAlign) || 'left');
     setIsDarkMode(
       localStorage.getItem(storageKeys.darkMode) === 'true' ||
       window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -65,8 +71,9 @@ export default function ReaderPage() {
     localStorage.setItem(storageKeys.sectionId, sectionId);
     localStorage.setItem(storageKeys.verseNumber, String(verseNumber));
     localStorage.setItem(storageKeys.fontSize, String(fontSize));
+    localStorage.setItem(storageKeys.textAlign, textAlign);
     localStorage.setItem(storageKeys.darkMode, String(isDarkMode));
-  }, [collectionId, fontSize, isDarkMode, isReady, sectionId, verseNumber, collection.id]);
+  }, [collectionId, fontSize, textAlign, isDarkMode, isReady, sectionId, verseNumber, collection.id]);
 
   const section = useMemo(
     () => collection.sections.find((item) => item.id === sectionId) || collection.sections[0],
@@ -170,6 +177,21 @@ export default function ReaderPage() {
               >
                 A+
               </button>
+
+              <div className="align-toggle" role="group" aria-label="Text alignment">
+                {ALIGN_OPTIONS.map(opt => (
+                  <button
+                    key={opt}
+                    type="button"
+                    className={`align-btn${textAlign === opt ? ' active' : ''}`}
+                    onClick={() => setTextAlign(opt)}
+                    title={`Align ${opt}`}
+                    aria-pressed={textAlign === opt}
+                  >
+                    {ALIGN_LABELS[opt]}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -184,7 +206,7 @@ export default function ReaderPage() {
 
           <article className="verse-card">
             <p className="verse-number">Verse {verse.number}</p>
-            <div className="verse-text">{verse.text}</div>
+            <div className="verse-text" style={{ textAlign }}>{verse.text}</div>
           </article>
 
           <div className="reader-navigation">
