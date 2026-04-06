@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
-  startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday
+  startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, subDays
 } from 'date-fns';
 import { getCalendarMarkers, setCalendarMarker, getCalendarColors, setCalendarColors } from '../lib/db';
 import { auth } from '../lib/firebase';
@@ -44,6 +44,43 @@ export default function ActivityCalendar() {
   const [editLegendHex, setEditLegendHex] = useState("");
 
   const popupRef = useRef(null);
+
+  // Compute Gamification Stats based precisely on active markers
+  const calculateStats = (markersObj) => {
+    const dates = Object.keys(markersObj)
+      .filter(date => markersObj[date] && markersObj[date].length > 0 && !markersObj[date].includes('clear'))
+      .sort((a, b) => new Date(b) - new Date(a));
+      
+    const totalDays = dates.length;
+    let currentStreak = 0;
+    
+    if (dates.length > 0) {
+      const today = new Date();
+      const todayStr = format(today, 'yyyy-MM-dd');
+      const yesterdayStr = format(subDays(today, 1), 'yyyy-MM-dd');
+      
+      let checkStr = null;
+      if (dates.includes(todayStr)) checkStr = todayStr;
+      else if (dates.includes(yesterdayStr)) checkStr = yesterdayStr;
+      
+      if (checkStr) {
+        currentStreak = 1;
+        let currentIterDate = new Date(checkStr + 'T00:00:00'); // safe parsing
+        while (true) {
+          currentIterDate = subDays(currentIterDate, 1);
+          const nextStr = format(currentIterDate, 'yyyy-MM-dd');
+          if (dates.includes(nextStr)) {
+            currentStreak++;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+    return { currentStreak, totalDays };
+  };
+
+  const { currentStreak, totalDays } = calculateStats(markers);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -187,6 +224,16 @@ export default function ActivityCalendar() {
             )}
           </h3>
           <p className="panel-header-subtitle">Tap a date to assign a colored marker, or change a month.</p>
+          
+          {/* Gamification Stats Row */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '16px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '24px', background: 'var(--bg-elevated)', border: '1px solid var(--border-accent)', fontSize: '0.78rem', fontWeight: '500', color: 'var(--accent)', boxShadow: 'var(--shadow-xs)' }}>
+              <span>🔥</span> {currentStreak} Day Streak
+            </div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '24px', background: 'var(--bg-inset)', border: '1px solid var(--border-primary)', fontSize: '0.78rem', fontWeight: '500', color: 'var(--text-secondary)' }}>
+              <span>✨</span> {totalDays} Total Focus Days
+            </div>
+          </div>
         </div>
         <div className="calendar-nav" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%', marginBottom: '16px' }}>
           <div className="calendar-month-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', width: '100%' }}>
