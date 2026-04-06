@@ -79,6 +79,9 @@ export default function ReaderPage() {
   const wakeLockRef = useRef(null);
   const audioRef = useRef(null);
   const [shouldAutoPlayNext, setShouldAutoPlayNext] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [sharePreviewUrl, setSharePreviewUrl] = useState(null);
+  const [shareFileName, setShareFileName] = useState('');
 
   useEffect(() => {
     let initialSectionId = collection.sections[0].id;
@@ -265,6 +268,202 @@ export default function ReaderPage() {
     }
   }, [section.audioUrl, shouldAutoPlayNext]);
 
+  const handleShareVerse = async () => {
+    setSharing(true);
+    try {
+      const W = 1080, H = 1080;
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      // Background gradient
+      const bg = ctx.createLinearGradient(0, 0, W, H);
+      if (isDarkMode) {
+        bg.addColorStop(0, '#181515');
+        bg.addColorStop(1, '#0d0c0c');
+      } else {
+        bg.addColorStop(0, '#ffffff');
+        bg.addColorStop(1, '#f4eee2');
+      }
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // Decorative top border line
+      const accent = '#9e6b30';
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(80, 80);
+      ctx.lineTo(W - 80, 80);
+      ctx.stroke();
+
+      // Helper: wrap text and return lines
+      function wrapText(text, maxWidth, font) {
+        ctx.font = font;
+        const words = text.replace(/\n/g, ' ¶ ').split(' ');
+        const lines = [];
+        let currentLine = '';
+        for (const word of words) {
+          if (word === '¶') {
+            lines.push(currentLine.trim());
+            currentLine = '';
+            continue;
+          }
+          const test = currentLine + (currentLine ? ' ' : '') + word;
+          if (ctx.measureText(test).width > maxWidth && currentLine) {
+            lines.push(currentLine.trim());
+            currentLine = word;
+          } else {
+            currentLine = test;
+          }
+        }
+        if (currentLine.trim()) lines.push(currentLine.trim());
+        return lines;
+      }
+
+      const pad = 80;
+      const contentWidth = W - pad * 2;
+      let y = 120;
+
+      // Title
+      const titleFont = 'bold 36px "Cormorant Garamond", "Noto Serif Devanagari", Georgia, serif';
+      ctx.font = titleFont;
+      ctx.fillStyle = accent;
+      ctx.textAlign = 'center';
+      ctx.fillText(collection.title.toUpperCase(), W / 2, y);
+      y += 60;
+
+      // Verse number badge
+      ctx.font = '24px "Cormorant Garamond", Georgia, serif';
+      ctx.fillStyle = isDarkMode ? '#887d79' : '#8a7b6b';
+      ctx.fillText(`— Verse ${verse.number} —`, W / 2, y);
+      y += 50;
+
+      // Thin separator
+      ctx.strokeStyle = isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(158,107,48,0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(W / 2 - 120, y);
+      ctx.lineTo(W / 2 + 120, y);
+      ctx.stroke();
+      y += 40;
+
+      // Main shloka text
+      const mainText = verse.hindiShloka || verse.text || '';
+      const shlokaFont = '500 44px "Noto Serif Devanagari", "Cormorant Garamond", Georgia, serif';
+      const shlokaLines = wrapText(mainText, contentWidth, shlokaFont);
+      ctx.font = shlokaFont;
+      ctx.fillStyle = isDarkMode ? '#e9e3df' : '#1a1411';
+      ctx.textAlign = 'center';
+      const shlokaLineHeight = 66;
+      for (const line of shlokaLines) {
+        ctx.fillText(line, W / 2, y);
+        y += shlokaLineHeight;
+      }
+      y += 20;
+
+      // English shloka / transliteration
+      if (verse.englishShloka) {
+        const translitFont = 'italic 30px "Cormorant Garamond", Georgia, serif';
+        const translitLines = wrapText(verse.englishShloka, contentWidth, translitFont);
+        ctx.font = translitFont;
+        ctx.fillStyle = isDarkMode ? '#a4958f' : '#61544a';
+        const translitLineHeight = 46;
+        for (const line of translitLines) {
+          if (y > H - 160) break; // don't overflow
+          ctx.fillText(line, W / 2, y);
+          y += translitLineHeight;
+        }
+        y += 10;
+      }
+
+      // Vyakhya / meaning (if space allows)
+      if (verse.vyakhya && y < H - 250) {
+        ctx.strokeStyle = isDarkMode ? 'rgba(255,255,255,0.06)' : 'rgba(158,107,48,0.15)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(pad, y);
+        ctx.lineTo(W - pad, y);
+        ctx.stroke();
+        y += 30;
+
+        const vyakhyaFont = '28px "Noto Serif Devanagari", "Cormorant Garamond", Georgia, serif';
+        const vyakhyaLines = wrapText(verse.vyakhya, contentWidth, vyakhyaFont);
+        ctx.font = vyakhyaFont;
+        ctx.fillStyle = isDarkMode ? '#cfc5c0' : '#4a3f36';
+        const vyakhyaLineHeight = 42;
+        for (const line of vyakhyaLines) {
+          if (y > H - 130) break;
+          ctx.fillText(line, W / 2, y);
+          y += vyakhyaLineHeight;
+        }
+      }
+
+      // Bottom bar
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(80, H - 80);
+      ctx.lineTo(W - 80, H - 80);
+      ctx.stroke();
+
+      ctx.font = '22px "Cormorant Garamond", Georgia, serif';
+      ctx.fillStyle = isDarkMode ? '#887d79' : '#8a7b6b';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${section.title}`, pad, H - 45);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = accent;
+      ctx.font = 'bold 22px "Cormorant Garamond", Georgia, serif';
+      ctx.fillText('🌟 Shri Harivansh', W - pad, H - 45);
+
+      // Export
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          setSharing(false);
+          return;
+        }
+        const fileName = `ShriHarivansh_Verse_${verse.number}.png`;
+        const file = new File([blob], fileName, { type: 'image/png' });
+
+        // Try native share first (works on mobile)
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file] });
+            setSharing(false);
+            return;
+          } catch (_) {}
+        }
+
+        // Fallback: show preview modal with download button
+        const url = URL.createObjectURL(blob);
+        setSharePreviewUrl(url);
+        setShareFileName(fileName);
+        setSharing(false);
+      }, 'image/png');
+    } catch (e) {
+      console.error('Share failed:', e);
+      setSharing(false);
+    }
+  };
+
+  const handleDownloadShareImage = () => {
+    if (!sharePreviewUrl) return;
+    const a = document.createElement('a');
+    a.href = sharePreviewUrl;
+    a.download = shareFileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const closeSharePreview = () => {
+    if (sharePreviewUrl) URL.revokeObjectURL(sharePreviewUrl);
+    setSharePreviewUrl(null);
+    setShareFileName('');
+  };
+
   const hasYouTube = collection.youtubeIds && collection.youtubeIds.length > 0;
   const hasAudio = section.audioUrl && section.audioUrl.length > 0;
 
@@ -388,14 +587,29 @@ export default function ReaderPage() {
           <article className="verse-card" {...bindGestures()} style={{ touchAction: 'pan-y' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <p className="verse-number" style={{ margin: 0 }}>Verse {verse.number}</p>
-              <button 
-                type="button" 
-                className={`ghost-btn bookmark-btn ${bookmarkedKeys.has(currentBookmarkKey) ? 'bookmarked' : ''}`}
-                onClick={handleToggleBookmark}
-                title={bookmarkedKeys.has(currentBookmarkKey) ? "Remove bookmark" : "Bookmark this verse"}
-              >
-                {bookmarkedKeys.has(currentBookmarkKey) ? '★' : '☆'}
-              </button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  type="button" 
+                  className="ghost-btn icon-btn"
+                  onClick={handleShareVerse}
+                  title="Share Verse as Image"
+                  disabled={sharing}
+                >
+                  {sharing ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="spinning"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                  )}
+                </button>
+                <button 
+                  type="button" 
+                  className={`ghost-btn bookmark-btn ${bookmarkedKeys.has(currentBookmarkKey) ? 'bookmarked' : ''}`}
+                  onClick={handleToggleBookmark}
+                  title={bookmarkedKeys.has(currentBookmarkKey) ? "Remove bookmark" : "Bookmark this verse"}
+                >
+                  {bookmarkedKeys.has(currentBookmarkKey) ? '★' : '☆'}
+                </button>
+              </div>
             </div>
             {verse.hindiShloka ? (
               <div className="rsn-verse" style={{ textAlign }}>
@@ -444,6 +658,53 @@ export default function ReaderPage() {
         <p className="footer-sanskrit">॥ राधे राधे ॥</p>
         <p className="footer-credit">Shri Harivansh</p>
       </footer>
+
+      {/* Share Preview Modal */}
+      {sharePreviewUrl && (
+        <div className="quote-lightbox" onClick={closeSharePreview} role="dialog" aria-label="Share preview">
+          <div style={{ 
+            position: 'relative', 
+            maxWidth: '90vw', 
+            maxHeight: '80vh', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            gap: '16px' 
+          }} onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src={sharePreviewUrl} 
+              alt={`Share card for Verse ${verse.number}`}
+              style={{ 
+                maxWidth: '100%', 
+                maxHeight: '70vh', 
+                borderRadius: '12px', 
+                boxShadow: '0 20px 60px rgba(0,0,0,0.5)' 
+              }}
+            />
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                className="primary-btn" 
+                onClick={handleDownloadShareImage}
+                style={{ padding: '12px 28px', fontSize: '0.95rem' }}
+              >
+                ⬇ Download Image
+              </button>
+              <button 
+                className="secondary-btn" 
+                onClick={closeSharePreview}
+                style={{ padding: '12px 28px', fontSize: '0.95rem' }}
+              >
+                ✕ Close
+              </button>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', textAlign: 'center' }}>
+              Long-press the image to share directly on mobile
+            </p>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
