@@ -1,0 +1,313 @@
+/* ═══════════════════════════════════════════════════
+   Reader
+   ═══════════════════════════════════════════════════ */
+
+.reader-panel {
+  padding: 36px;
+}
+
+.panel-header.reader-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.reader-tools {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.reader-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 10px 16px;
+  background: var(--accent-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.01em;
+}
+
+
+/* ── Audio ── */
+
+.audio-wrap {
+  margin-bottom: 24px;
+}
+
+.audio-wrap audio {
+  width: 100%;
+  height: 40px;
+  border-radius: var(--radius-sm);
+}
+
+
+/* ── Verse ── */
+
+.verse-card {
+  padding: 36px 32px;
+  border-radius: var(--radius-xl);
+  background: var(--bg-body);
+  border: 1px solid var(--border-primary);
+  position: relative;
+}
+
+.verse-card::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+  opacity: 0.3;
+  border-radius: 2px;
+}
+
+.verse-number {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+
+.verse-text {
+  font-family: 'Noto Serif Devanagari', 'Mangal', serif;
+  font-size: var(--reader-font-size);
+  line-height: 2.2;
+  white-space: pre-wrap;
+  color: var(--text-primary);
+}
+
+
+/* ── RSN Verse Format ── */
+
+.rsn-verse {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.rsn-section {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.rsn-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.rsn-section:first-child {
+  padding-top: 0;
+}
+
+.rsn-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.7;
+  margin-bottom: 10px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.rsn-hindi .verse-text {
+  font-size: calc(var(--reader-font-size) * 1.05);
+  color: var(--text-primary);
+}
+
+.rsn-translit {
+  font-family: 'Cormorant Garamond', Georgia, serif !important;
+  font-style: italic;
+  font-size: calc(var(--reader-font-size) * 0.88) !important;
+  color: var(--text-secondary) !important;
+  line-height: 2.0 !important;
+}
+
+.rsn-vyakhya .verse-text,
+.rsn-vyakhya-text {
+  font-size: calc(var(--reader-font-size) * 0.92);
+  color: var(--text-secondary);
+  line-height: 1.9;
+  padding-left: 16px;
+  border-left: 2px solid var(--accent-medium);
+}
+
+.rsn-vyakhya-text {
+  font-family: 'Noto Serif Devanagari', 'Mangal', serif;
+  white-space: pre-wrap;
+}
+
+
+/* ── YouTube Embed ── */
+
+.youtube-wrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 */
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-inset);
+}
+
+.youtube-wrap iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: var(--radius-md);
+}
+
+
+/* ── Expandable Accordion ── */
+
+.expandable {
+  margin-bottom: 16px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: box-shadow var(--transition-base);
+}
+
+.expandable:hover {
+  box-shadow: var(--shadow-xs);
+}
+
+.expandable.expanded {
+  border-color: var(--border-accent);
+}
+
+.expandable-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--accent-subtle);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: none;
+}
+
+.expandable-header:hover {
+  background: var(--accent-medium);
+  color: var(--text-primary);
+}
+
+.expanded .expandable-header {
+  color: var(--accent);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.expandable-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.expandable-icon {
+  font-size: 0.75rem;
+  color: var(--text-quaternary);
+  transition: transform var(--transition-fast);
+}
+
+.expandable-body {
+  padding: 16px;
+  animation: expandIn 0.2s ease-out;
+}
+
+@keyframes expandIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Inside verse card, expandable styling */
+.rsn-verse .expandable {
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+.rsn-verse .expandable-body {
+  padding: 16px 0 0 0;
+}
+
+/* ── Text Alignment Toggle ── */
+
+.align-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.align-btn {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  color: var(--text-quaternary);
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+
+.align-btn:last-child {
+  border-right: none;
+}
+
+.align-btn:hover {
+  color: var(--text-secondary);
+  background: var(--accent-subtle);
+}
+
+.align-btn.active {
+  color: var(--accent);
+  background: var(--accent-medium);
+  font-weight: 600;
+}
+
+/* ── Verse Select ── */
+
+.verse-select {
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-body);
+  border: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.verse-select:focus {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-focus);
+}
+
+
+/* ── Navigation ── */
+
+.reader-navigation {
+  display: flex;
+  gap: 10px;
+  margin-top: 28px;
+  justify-content: space-between;
+}
+

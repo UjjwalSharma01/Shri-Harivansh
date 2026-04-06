@@ -1,0 +1,88 @@
+/* ═══════════════════════════════════════════════════
+   Shri Harivansh — Premium Devotional Design System
+   Inspired by luxury editorial & meditation app UIs
+   ═══════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Noto+Serif+Devanagari:wght@400;500;600;700&display=swap');
+
+/* ── Light Theme ── */
+:root {
+  color-scheme: light;
+
+  --bg-body: #f8f5f1;
+  --bg-elevated: #ffffff;
+  --bg-subtle: #f2ede7;
+  --bg-inset: #ece6de;
+
+  --surface-primary: rgba(255, 255, 255, 0.92);
+  --surface-secondary: rgba(255, 255, 255, 0.6);
+  --surface-hover: rgba(255, 255, 255, 1);
+
+  --text-primary: #1a1411;
+  --text-secondary: #4a4038;
+  --text-tertiary: #7d7168;
+  --text-quaternary: #a89e94;
+
+  --accent: #9e6b30;
+  --accent-hover: #b5803e;
+  --accent-subtle: rgba(158, 107, 48, 0.08);
+  --accent-medium: rgba(158, 107, 48, 0.15);
+  --accent-text: #ffffff;
+
+  --border-primary: rgba(26, 20, 17, 0.08);
+  --border-secondary: rgba(26, 20, 17, 0.04);
+  --border-accent: rgba(158, 107, 48, 0.2);
+
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.04), 0 12px 36px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.03), 0 24px 64px rgba(0,0,0,0.08);
+  --shadow-focus: 0 0 0 3px rgba(158, 107, 48, 0.15);
+
+  --reader-font-size: 1.25rem;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Dark Theme ── */
+:root.dark {
+  color-scheme: dark;
+
+  --bg-body: #0f0d0b;
+  --bg-elevated: #1a1714;
+  --bg-subtle: #151210;
+  --bg-inset: #1f1b17;
+
+  --surface-primary: rgba(26, 23, 20, 0.92);
+  --surface-secondary: rgba(26, 23, 20, 0.6);
+  --surface-hover: rgba(32, 28, 24, 1);
+
+  --text-primary: #ede6dd;
+  --text-secondary: #b8ad9f;
+  --text-tertiary: #887d70;
+  --text-quaternary: #5c5347;
+
+  --accent: #c9944d;
+  --accent-hover: #daa660;
+  --accent-subtle: rgba(201, 148, 77, 0.08);
+  --accent-medium: rgba(201, 148, 77, 0.15);
+  --accent-text: #0f0d0b;
+
+  --border-primary: rgba(237, 230, 221, 0.08);
+  --border-secondary: rgba(237, 230, 221, 0.04);
+  --border-accent: rgba(201, 148, 77, 0.2);
+
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.2), 0 12px 36px rgba(0,0,0,0.2);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.15), 0 24px 64px rgba(0,0,0,0.3);
+  --shadow-focus: 0 0 0 3px rgba(201, 148, 77, 0.2);
+}
+

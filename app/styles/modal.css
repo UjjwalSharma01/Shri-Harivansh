@@ -1,0 +1,120 @@
+/* ═══════════════════════════════════════════════════
+   Modal
+   ═══════════════════════════════════════════════════ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: overlayIn 0.2s ease-out;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: var(--bg-elevated);
+  padding: 36px;
+  border-radius: var(--radius-2xl);
+  max-width: 380px;
+  width: 100%;
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-content h2 {
+  font-size: 1.5rem;
+}
+
+.divider {
+  text-align: center;
+  position: relative;
+  color: var(--text-quaternary);
+  font-size: 0.75rem;
+  margin: 6px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 35%;
+  height: 1px;
+  background: var(--border-primary);
+}
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-form input {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+  background: var(--bg-body);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--shadow-focus);
+}
+
+.auth-form input::placeholder {
+  color: var(--text-quaternary);
+}
+
+.error-text {
+  color: #c53030;
+  font-size: 0.82rem;
+  background: rgba(197, 48, 48, 0.06);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(197, 48, 48, 0.08);
+}
+
+.google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.toggle-auth {
+  font-size: 0.78rem;
+  color: var(--text-quaternary);
+  text-align: center;
+}
+
+.toggle-auth:hover {
+  color: var(--accent);
+}
+

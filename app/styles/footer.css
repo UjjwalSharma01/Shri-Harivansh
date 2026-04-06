@@ -1,0 +1,24 @@
+/* ═══════════════════════════════════════════════════
+   Footer
+   ═══════════════════════════════════════════════════ */
+
+.site-footer {
+  margin-top: 64px;
+  text-align: center;
+  color: var(--text-quaternary);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+
+.site-footer .footer-sanskrit {
+  font-family: 'Noto Serif Devanagari', serif;
+  font-size: 0.85rem;
+  color: var(--accent);
+  opacity: 0.35;
+  margin-bottom: 8px;
+}
+
+.site-footer .footer-credit {
+  opacity: 0.5;
+}
+

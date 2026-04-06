@@ -1,0 +1,24 @@
+/* ═══════════════════════════════════════════════════
+   Text Utilities
+   ═══════════════════════════════════════════════════ */
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.subtle {
+  color: var(--text-tertiary);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.muted {
+  color: var(--text-quaternary);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+

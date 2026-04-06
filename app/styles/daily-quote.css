@@ -1,0 +1,234 @@
+/* ═══════════════════════════════════════════════════
+   Daily Quote
+   ═══════════════════════════════════════════════════ */
+
+.daily-quote-section {
+  padding: 36px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.daily-quote-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.5;
+}
+
+.daily-quote-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.daily-quote-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-top: 6px;
+}
+
+.daily-quote-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.daily-quote-date {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.01em;
+}
+
+.daily-quote-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.daily-quote-badge.stale {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border: 1px solid var(--border-accent);
+}
+
+.daily-quote-frame {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.daily-quote-frame:hover {
+  transform: scale(1.005);
+  box-shadow: var(--shadow-lg);
+}
+
+.daily-quote-frame:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.daily-quote-frame:hover .daily-quote-overlay {
+  opacity: 1;
+}
+
+.daily-quote-glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    rgba(158, 107, 48, 0.3) 30%,
+    rgba(158, 107, 48, 0.1) 50%,
+    rgba(158, 107, 48, 0.3) 70%,
+    var(--accent) 100%
+  );
+  opacity: 0.5;
+  z-index: 0;
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.daily-quote-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  object-fit: contain;
+  display: block;
+  border-radius: var(--radius-xl);
+  border: 3px solid var(--border-accent);
+}
+
+.daily-quote-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 20px;
+  background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 40%);
+  border-radius: var(--radius-xl);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.daily-quote-overlay span {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.9);
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.daily-quote-credit {
+  margin-top: 16px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.88rem;
+  font-style: italic;
+  color: var(--text-tertiary);
+  letter-spacing: 0.01em;
+}
+
+/* Loading shimmer */
+.daily-quote-loading {
+  padding: 20px 0;
+}
+
+.quote-shimmer {
+  width: 100%;
+  height: 320px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    110deg,
+    var(--bg-inset) 0%,
+    var(--bg-subtle) 40%,
+    var(--bg-inset) 60%,
+    var(--bg-subtle) 100%
+  );
+  background-size: 250% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Lightbox */
+.quote-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: zoom-out;
+  animation: overlayIn 0.25s ease-out;
+}
+
+.quote-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.8);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.15);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  z-index: 2001;
+}
+
+.quote-lightbox-close:hover {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  transform: scale(1.1);
+}
+
+.quote-lightbox-img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+

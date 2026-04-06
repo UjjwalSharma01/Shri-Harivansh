@@ -1,0 +1,45 @@
+/* ═══════════════════════════════════════════════════
+   Top Bar
+   ═══════════════════════════════════════════════════ */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.topbar-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.topbar-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-primary);
+  display: inline-block;
+}
+
+.topbar-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.02em;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+

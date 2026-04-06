@@ -1,0 +1,29 @@
+/* ═══════════════════════════════════════════════════
+   Divider
+   ═══════════════════════════════════════════════════ */
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 4px 0;
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  max-width: 80px;
+  height: 1px;
+  background: var(--border-primary);
+}
+
+.section-divider span {
+  font-size: 0.6rem;
+  color: var(--text-quaternary);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+

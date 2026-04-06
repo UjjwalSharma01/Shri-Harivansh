@@ -1,0 +1,49 @@
+/* ═══════════════════════════════════════════════════
+   Hero
+   ═══════════════════════════════════════════════════ */
+
+.hero {
+  padding: 48px 44px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.4;
+}
+
+.hero-content {
+  max-width: 560px;
+}
+
+.hero-content h2 {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.hero-content .subtitle {
+  color: var(--text-tertiary);
+  font-size: 0.92rem;
+  line-height: 1.75;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+

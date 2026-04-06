@@ -1,0 +1,93 @@
+/* ═══════════════════════════════════════════════════
+   Collection Cards
+   ═══════════════════════════════════════════════════ */
+
+.grid-panel {
+  padding: 36px;
+}
+
+.panel-header {
+  margin-bottom: 24px;
+}
+
+.panel-header .eyebrow {
+  margin-bottom: 8px;
+}
+
+.panel-header-subtitle {
+  color: var(--text-quaternary);
+  font-size: 0.82rem;
+  margin-top: 6px;
+}
+
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.collection-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-primary);
+  background: var(--bg-body);
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.collection-card:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.collection-card strong {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.collection-card p {
+  color: var(--text-tertiary);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.collection-card small {
+  color: var(--text-quaternary);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.75rem;
+  color: var(--text-quaternary);
+  padding-top: 14px;
+  border-top: 1px solid var(--border-secondary);
+  letter-spacing: 0.01em;
+}
+
+.card-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-stat-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.5;
+}
+

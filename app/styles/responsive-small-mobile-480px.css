@@ -1,0 +1,119 @@
+/* ═══════════════════════════════════════════════════
+   Responsive — Small Mobile (≤ 480px)
+   ═══════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+  .daily-quote-section {
+    padding: 18px 16px;
+  }
+
+  .daily-quote-title {
+    font-size: 1.15rem;
+  }
+
+  .daily-quote-credit {
+    font-size: 0.78rem;
+  }
+
+  .quote-shimmer {
+    height: 160px;
+  }
+  .app-shell {
+    width: calc(100% - 24px);
+    padding: 20px 0 40px;
+  }
+
+  .topbar {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .topbar-brand {
+    gap: 6px;
+  }
+
+  .topbar-title {
+    font-size: 1.05rem;
+  }
+
+  .topbar-divider {
+    display: none;
+  }
+
+  .topbar-subtitle {
+    display: none;
+  }
+
+  .topbar-actions {
+    gap: 6px;
+  }
+
+  .panel {
+    border-radius: var(--radius-lg);
+  }
+
+  .hero {
+    padding: 24px 18px;
+  }
+
+  .hero-content h2 {
+    font-size: 1.4rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions .primary-btn,
+  .hero-actions .secondary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .grid-panel,
+  .reader-panel {
+    padding: 18px 16px;
+  }
+
+  .verse-card {
+    padding: 20px 16px;
+    border-radius: var(--radius-md);
+  }
+
+  .verse-text {
+    line-height: 2.0;
+  }
+
+  .collection-card {
+    padding: 18px;
+  }
+
+  .reader-tools {
+    gap: 6px;
+  }
+
+  .ghost-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    padding: 10px 16px;
+    font-size: 0.82rem;
+  }
+
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.35rem; }
+  h3 { font-size: 1.1rem; }
+
+  .section-divider {
+    padding: 0;
+  }
+
+  .modal-content {
+    padding: 24px 20px;
+    border-radius: var(--radius-lg);
+  }
+}
+
