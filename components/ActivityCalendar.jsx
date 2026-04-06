@@ -139,16 +139,34 @@ export default function ActivityCalendar() {
           
           <div className="calendar-month-jump">
             <span className="calendar-month-label">{format(currentDate, 'MMMM yyyy')}</span>
-            <input 
-              type="month" 
-              className="calendar-month-picker"
-              value={format(currentDate, 'yyyy-MM')}
-              onChange={(e) => {
-                const [year, month] = e.target.value.split('-');
-                if (year && month) setCurrentDate(new Date(parseInt(year), parseInt(month) - 1));
-              }}
-              title="Jump to specific month"
-            />
+            
+            <div className="calendar-jump-controls">
+              <input 
+                type="date" 
+                className="calendar-date-picker"
+                value={format(currentDate, 'yyyy-MM-dd')}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    const [year, month, day] = e.target.value.split('-');
+                    const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                    setCurrentDate(dateObj);
+                    setSelectedDate(dateObj);
+                  }
+                }}
+                title="Jump to specific date"
+              />
+              <button 
+                className="ghost-btn tiny-btn calendar-today-btn" 
+                onClick={() => {
+                  const now = new Date();
+                  setCurrentDate(now);
+                  setSelectedDate(now);
+                }}
+                title="Jump to today"
+              >
+                Today
+              </button>
+            </div>
           </div>
 
           <button className="ghost-btn nav-arrow" onClick={nextMonth}>&rarr;</button>

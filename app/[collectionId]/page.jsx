@@ -21,8 +21,21 @@ const storageKeys = {
 const ALIGN_OPTIONS = ['left', 'center', 'right'];
 const ALIGN_LABELS = { left: '⫷', center: '⫿', right: '⫸' };
 
-function Expandable({ label, defaultOpen = false, children }) {
-  const [open, setOpen] = useState(defaultOpen);
+function Expandable({ label, defaultOpen = false, storageKey, children }) {
+  const [open, setOpen] = useState(() => {
+    if (typeof window !== 'undefined' && storageKey) {
+      const saved = localStorage.getItem(storageKey);
+      if (saved !== null) return saved === 'true';
+    }
+    return defaultOpen;
+  });
+
+  useEffect(() => {
+    if (storageKey) {
+      localStorage.setItem(storageKey, String(open));
+    }
+  }, [open, storageKey]);
+
   return (
     <div className={`expandable ${open ? 'expanded' : ''}`}>
       <button
@@ -250,7 +263,7 @@ export default function ReaderPage() {
 
           {/* YouTube Video — expandable */}
           {hasYouTube && (
-            <Expandable label="▶  Watch Video" defaultOpen={false}>
+            <Expandable label="▶  Watch Video" defaultOpen={false} storageKey="shri-harivansh.youtubeOpen">
               <div className="youtube-wrap">
                 {collection.youtubeIds.map(id => (
                   <iframe
@@ -267,7 +280,7 @@ export default function ReaderPage() {
 
           {/* Audio player — expandable if video present, always shown otherwise */}
           {hasAudio && hasYouTube && (
-            <Expandable label="🔊  Listen Audio" defaultOpen={false}>
+            <Expandable label="🔊  Listen Audio" defaultOpen={false} storageKey="shri-harivansh.audioOpen">
               <div className="audio-wrap">
                 <audio controls preload="none" src={section.audioUrl} key={section.audioUrl} />
               </div>
@@ -288,12 +301,12 @@ export default function ReaderPage() {
                   <div className="verse-text">{verse.hindiShloka}</div>
                 </div>
                 {verse.englishShloka && (
-                  <Expandable label="Transliteration" defaultOpen={false}>
+                  <Expandable label="Transliteration" defaultOpen={false} storageKey="shri-harivansh.translitOpen">
                     <div className="verse-text rsn-translit">{verse.englishShloka}</div>
                   </Expandable>
                 )}
                 {verse.vyakhya && (
-                  <Expandable label="व्याख्या — Meaning" defaultOpen={true}>
+                  <Expandable label="व्याख्या — Meaning" defaultOpen={true} storageKey="shri-harivansh.meaningOpen">
                     <div className="rsn-vyakhya-text verse-text">{verse.vyakhya}</div>
                   </Expandable>
                 )}
