@@ -24,6 +24,11 @@ export default function ActivityCalendar() {
 
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Instantly load local cache on client mount (bypasses Next.js SSR hydration limits)
   useEffect(() => {
@@ -238,7 +243,7 @@ export default function ActivityCalendar() {
         <div className="calendar-nav" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%', marginBottom: '16px' }}>
           <div className="calendar-month-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', width: '100%' }}>
             <button className="ghost-btn nav-arrow" onClick={prevMonth} style={{ padding: '8px 16px', fontSize: '1.2rem' }}>&larr;</button>
-            <span className="calendar-month-label" style={{ fontSize: '1.1rem', fontWeight: '500', minWidth: '120px', textAlign: 'center' }}>{format(currentDate, 'MMMM yyyy')}</span>
+            <span className="calendar-month-label" style={{ fontSize: '1.1rem', fontWeight: '500', minWidth: '120px', textAlign: 'center' }}>{mounted ? format(currentDate, 'MMMM yyyy') : ''}</span>
             <button className="ghost-btn nav-arrow" onClick={nextMonth} style={{ padding: '8px 16px', fontSize: '1.2rem' }}>&rarr;</button>
           </div>
           
@@ -247,7 +252,7 @@ export default function ActivityCalendar() {
               type="date" 
               className="calendar-date-picker"
               style={{ padding: '8px 12px', border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-secondary)' }}
-              value={format(currentDate, 'yyyy-MM-dd')}
+              value={mounted ? format(currentDate, 'yyyy-MM-dd') : ''}
               onChange={(e) => {
                 if (e.target.value) {
                   const [year, month, day] = e.target.value.split('-');

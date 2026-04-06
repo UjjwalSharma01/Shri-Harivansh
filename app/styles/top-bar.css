@@ -43,3 +43,28 @@
   align-items: center;
 }
 
+/* ── Responsive Mobile Utilities ── */
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.show-on-mobile {
+  display: none !important;
+}
+
+@media (max-width: 480px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+  .show-on-mobile {
+    display: block !important;
+  }
+  .topbar-actions .primary-btn.icon-btn {
+    padding: 8px;
+  }
+}
+

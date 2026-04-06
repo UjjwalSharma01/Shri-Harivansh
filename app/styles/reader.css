@@ -311,3 +311,28 @@
   justify-content: space-between;
 }
 
+/* ── Bookmark Button ── */
+
+.bookmark-btn {
+  padding: 0px 8px;
+  font-size: 1.25rem;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s ease;
+  transform-origin: center;
+  color: inherit;
+}
+
+.bookmark-btn:active {
+  transform: scale(0.8);
+}
+
+.bookmark-btn.bookmarked {
+  color: var(--accent);
+  animation: popBookmark 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popBookmark {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
