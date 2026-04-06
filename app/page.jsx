@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { collections } from './content';
 import AuthButton from '../components/AuthButton';
+import { auth } from '../lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { getBookmarks } from '../lib/db';
 import DailyQuote from '../components/DailyQuote';
 import ActivityCalendar from '../components/ActivityCalendar';
 
@@ -16,6 +19,8 @@ export default function HomePage() {
   const [isReady, setIsReady] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [lastCollectionId, setLastCollectionId] = useState(null);
+  const [user, setUser] = useState(null);
+  const [bookmarks, setBookmarks] = useState([]);
 
   useEffect(() => {
     setIsDarkMode(
@@ -28,6 +33,18 @@ export default function HomePage() {
       setLastCollectionId(savedCollection);
     }
     setIsReady(true);
+
+    const unsub = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        const bms = await getBookmarks(currentUser);
+        setBookmarks(bms);
+      } else {
+        setBookmarks([]);
+      }
+    });
+
+    return () => unsub();
   }, []);
 
   useEffect(() => {
@@ -88,6 +105,52 @@ export default function HomePage() {
             </button>
           </div>
         </section>
+
+        {bookmarks.length > 0 && (
+          <>
+            <div className="section-divider">
+              <span>Meditate</span>
+            </div>
+            <section className="panel grid-panel">
+              <div className="panel-header">
+                <p className="eyebrow">My Favorites</p>
+                <h3>Saved Verses</h3>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {bookmarks.map((bm, idx) => {
+                  const coll = collections.find(c => c.id === bm.collectionId);
+                  const sec = coll?.sections.find(s => s.id === bm.sectionId);
+                  const verse = sec?.verses.find(v => v.number === bm.verseNumber);
+                  
+                  if (!verse) return null;
+
+                  return (
+                    <div 
+                      key={`${bm.collectionId}_${bm.sectionId}_${bm.verseNumber}_${idx}`} 
+                      className="collection-card" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        localStorage.setItem(storageKeys.collectionId, bm.collectionId);
+                        localStorage.setItem('shri-harivansh.sectionId', bm.sectionId);
+                        localStorage.setItem('shri-harivansh.verseNumber', String(bm.verseNumber));
+                        window.location.href = `/${bm.collectionId}`;
+                      }}
+                    >
+                      <div style={{ marginBottom: '8px' }}>
+                        <strong style={{ color: 'var(--accent)' }}>★ {coll?.title}</strong>
+                        <span style={{ margin: '0 8px', color: 'var(--text-tertiary)' }}>•</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Section {bm.sectionId}, Verse {bm.verseNumber}</span>
+                      </div>
+                      <p style={{ fontSize: '0.95rem', fontStyle: 'italic', marginBottom: '4px' }}>
+                        {verse.hindiShloka ? verse.hindiShloka.slice(0, 80) + '...' : verse.text.slice(0, 80) + '...'}
+                      </p>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+          </>
+        )}
 
         <div className="section-divider">
           <span>Collections</span>

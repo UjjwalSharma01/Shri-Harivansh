@@ -106,5 +106,16 @@
   .quote-shimmer {
     height: 200px;
   }
-}
 
+  .calendar-nav {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .calendar-legend-box {
+    width: 100%;
+    max-width: none;
+  }
+}

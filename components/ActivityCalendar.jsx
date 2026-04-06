@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { 
-  format, addMonths, subMonths, startOfMonth, endOfMonth, 
-  startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday 
+import {
+  format, addMonths, subMonths, startOfMonth, endOfMonth,
+  startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday
 } from 'date-fns';
 import { getCalendarMarkers, setCalendarMarker, getCalendarColors, setCalendarColors } from '../lib/db';
 import { auth } from '../lib/firebase';
@@ -19,12 +19,23 @@ const DEFAULT_COLORS = [
 export default function ActivityCalendar() {
   const [user, setUser] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [markers, setMarkers] = useState({});
-  const [markerColors, setMarkerColors] = useState(DEFAULT_COLORS);
   
+  // Instant load from cache to prevent UI delay
+  const [markers, setMarkers] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('shri-harivansh.calendar-markers');
+      if (cached) {
+        try { return JSON.parse(cached); } catch(e) {}
+      }
+    }
+    return {};
+  });
+  
+  const [markerColors, setMarkerColors] = useState(DEFAULT_COLORS);
+
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
-  
+
   // Legend editing state
   const [editingLegendId, setEditingLegendId] = useState(null);
   const [editLegendText, setEditLegendText] = useState("");
@@ -40,7 +51,14 @@ export default function ActivityCalendar() {
           getCalendarMarkers(u),
           getCalendarColors(u)
         ]);
-        setMarkers(markerData);
+        
+        // Offline-first PWA architecture: Merge cloud state down without wiping local interactions
+        setMarkers(prevCached => {
+          const merged = { ...prevCached, ...markerData };
+          localStorage.setItem('shri-harivansh.calendar-markers', JSON.stringify(merged));
+          return merged;
+        });
+        
         if (colorsData && colorsData.length > 0) {
           setMarkerColors(colorsData);
         }
@@ -61,9 +79,6 @@ export default function ActivityCalendar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [selectedDate]);
 
-  if (loading) return null;
-  if (!user) return null;
-
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
@@ -80,7 +95,7 @@ export default function ActivityCalendar() {
   const handleColorSelect = async (colorId) => {
     if (!selectedDate) return;
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    
+
     let newColorsArray = [];
 
     // Optimistic UI update
@@ -100,7 +115,7 @@ export default function ActivityCalendar() {
           // Add it
           newColorsArray = [...currentColors, colorId];
         }
-        
+
         if (newColorsArray.length === 0) {
           delete next[dateStr];
         } else {
@@ -110,8 +125,16 @@ export default function ActivityCalendar() {
       return next;
     });
     
+    // Optimistically update cache for instant reloads
+    setTimeout(() => {
+      setMarkers(current => {
+        localStorage.setItem('shri-harivansh.calendar-markers', JSON.stringify(current));
+        return current;
+      });
+    }, 0);
+
     if (colorId === 'clear') {
-       setSelectedDate(null);
+      setSelectedDate(null);
     }
 
     await setCalendarMarker(user, dateStr, newColorsArray);
@@ -119,11 +142,11 @@ export default function ActivityCalendar() {
 
   const handleLegendSave = async (id) => {
     if (!editLegendText.trim()) return;
-    
-    const nextColors = markerColors.map(c => 
+
+    const nextColors = markerColors.map(c =>
       c.id === id ? { ...c, label: editLegendText.trim(), color: editLegendHex } : c
     );
-    
+
     setMarkerColors(nextColors);
     setEditingLegendId(null);
     await setCalendarColors(user, nextColors);
@@ -140,7 +163,7 @@ export default function ActivityCalendar() {
     const newId = 'custom-' + Date.now();
     const newColors = [...markerColors, { id: newId, label: 'New Marker', color: '#666666' }];
     setMarkerColors(newColors);
-    
+
     setEditingLegendId(newId);
     setEditLegendText('New Marker');
     setEditLegendHex('#666666');
@@ -155,42 +178,42 @@ export default function ActivityCalendar() {
           <h3>My Reading Calendar</h3>
           <p className="panel-header-subtitle">Tap a date to assign a colored marker, or change a month.</p>
         </div>
-        <div className="calendar-nav">
-          <button className="ghost-btn nav-arrow" onClick={prevMonth}>&larr;</button>
-          
-          <div className="calendar-month-jump">
-            <span className="calendar-month-label">{format(currentDate, 'MMMM yyyy')}</span>
-            
-            <div className="calendar-jump-controls">
-              <input 
-                type="date" 
-                className="calendar-date-picker"
-                value={format(currentDate, 'yyyy-MM-dd')}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    const [year, month, day] = e.target.value.split('-');
-                    const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                    setCurrentDate(dateObj);
-                    setSelectedDate(dateObj);
-                  }
-                }}
-                title="Jump to specific date"
-              />
-              <button 
-                className="ghost-btn tiny-btn calendar-today-btn" 
-                onClick={() => {
-                  const now = new Date();
-                  setCurrentDate(now);
-                  setSelectedDate(now);
-                }}
-                title="Jump to today"
-              >
-                Today
-              </button>
-            </div>
+        <div className="calendar-nav" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%', marginBottom: '16px' }}>
+          <div className="calendar-month-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', width: '100%' }}>
+            <button className="ghost-btn nav-arrow" onClick={prevMonth} style={{ padding: '8px 16px', fontSize: '1.2rem' }}>&larr;</button>
+            <span className="calendar-month-label" style={{ fontSize: '1.1rem', fontWeight: '500', minWidth: '120px', textAlign: 'center' }}>{format(currentDate, 'MMMM yyyy')}</span>
+            <button className="ghost-btn nav-arrow" onClick={nextMonth} style={{ padding: '8px 16px', fontSize: '1.2rem' }}>&rarr;</button>
           </div>
-
-          <button className="ghost-btn nav-arrow" onClick={nextMonth}>&rarr;</button>
+          
+          <div className="calendar-jump-controls" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0', background: 'var(--bg-elevated)', borderRadius: '8px', border: '1px solid var(--border-primary)', overflow: 'hidden' }}>
+            <input 
+              type="date" 
+              className="calendar-date-picker"
+              style={{ padding: '8px 12px', border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-secondary)' }}
+              value={format(currentDate, 'yyyy-MM-dd')}
+              onChange={(e) => {
+                if (e.target.value) {
+                  const [year, month, day] = e.target.value.split('-');
+                  const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                  setCurrentDate(dateObj);
+                  setSelectedDate(dateObj);
+                }
+              }}
+              title="Jump to specific date"
+            />
+            <button 
+              className="ghost-btn tiny-btn calendar-today-btn" 
+              style={{ padding: '8px 16px', borderLeft: '1px solid var(--border-primary)', borderTop: 'none', borderRight: 'none', borderBottom: 'none', borderRadius: '0', height: '100%', background: 'transparent' }}
+              onClick={() => {
+                const now = new Date();
+                setCurrentDate(now);
+                setSelectedDate(now);
+              }}
+              title="Jump to today"
+            >
+              Today
+            </button>
+          </div>
         </div>
       </div>
 
@@ -202,12 +225,12 @@ export default function ActivityCalendar() {
                 <div key={d} className="calendar-classic-col">{d}</div>
               ))}
             </div>
-            
+
             <div className="calendar-classic-body">
               {(() => {
                 const rows = [];
                 let cells = [];
-                
+
                 days.forEach((day, i) => {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isCurrentMonth = isSameMonth(day, monthStart);
@@ -215,10 +238,10 @@ export default function ActivityCalendar() {
                   let markerIds = markers[dateStr] || [];
                   if (!Array.isArray(markerIds)) markerIds = [markerIds]; // Legacy safe fallback
                   const presentMarkers = markerIds.filter(id => id !== 'clear');
-                  
+
                   cells.push(
-                    <div 
-                      key={day.toString()} 
+                    <div
+                      key={day.toString()}
                       className={`calendar-classic-cell ${!isCurrentMonth ? 'disabled' : ''} ${isTodayDate ? 'today' : ''}`}
                       onClick={() => {
                         if (isCurrentMonth) {
@@ -229,7 +252,7 @@ export default function ActivityCalendar() {
                       }}
                     >
                       <span className="calendar-day-number">{format(day, 'd')}</span>
-                      
+
                       {/* Multi-marker display container */}
                       {presentMarkers.length > 0 && (
                         <div className="calendar-multi-markers" style={{ position: 'absolute', bottom: '8px', left: 0, right: 0, display: 'flex', gap: '4px', justifyContent: 'center', flexWrap: 'wrap', padding: '0 4px' }}>
@@ -242,7 +265,7 @@ export default function ActivityCalendar() {
                           })}
                         </div>
                       )}
-                      
+
                       {/* Color Picker Popup */}
                       {selectedDate && dateStr === format(selectedDate, 'yyyy-MM-dd') && (
                         <div className="calendar-color-picker" ref={popupRef}>
@@ -250,8 +273,8 @@ export default function ActivityCalendar() {
                           {markerColors.map(c => {
                             const isSelected = presentMarkers.includes(c.id);
                             return (
-                              <div 
-                                key={c.id} 
+                              <div
+                                key={c.id}
                                 className={`color-option ${isSelected ? 'selected' : ''}`}
                                 onClick={(e) => { e.stopPropagation(); handleColorSelect(c.id); }}
                                 style={{ backgroundColor: isSelected ? 'var(--bg-subtle)' : 'transparent' }}
@@ -262,12 +285,12 @@ export default function ActivityCalendar() {
                               </div>
                             );
                           })}
-                          <div 
-                              className="color-option"
-                              onClick={(e) => { e.stopPropagation(); handleColorSelect('clear'); }}
-                            >
-                              <span className="color-circle clear-circle">✕</span>
-                              Remove All
+                          <div
+                            className="color-option"
+                            onClick={(e) => { e.stopPropagation(); handleColorSelect('clear'); }}
+                          >
+                            <span className="color-circle clear-circle">✕</span>
+                            Remove All
                           </div>
                         </div>
                       )}
@@ -295,16 +318,16 @@ export default function ActivityCalendar() {
                 {editingLegendId === c.id ? (
                   <div className="legend-editor">
                     <div className="legend-editor-top">
-                      <input 
-                        type="color" 
+                      <input
+                        type="color"
                         value={editLegendHex}
                         onChange={(e) => setEditLegendHex(e.target.value)}
                         className="color-picker-input"
                         title="Choose color"
                       />
-                      <input 
-                        type="text" 
-                        value={editLegendText} 
+                      <input
+                        type="text"
+                        value={editLegendText}
                         onChange={(e) => setEditLegendText(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleLegendSave(c.id)}
                         autoFocus
@@ -320,7 +343,7 @@ export default function ActivityCalendar() {
                     </div>
                   </div>
                 ) : (
-                  <div 
+                  <div
                     className="legend-item"
                     title="Click to edit"
                     onClick={() => {
@@ -337,7 +360,7 @@ export default function ActivityCalendar() {
                 )}
               </div>
             ))}
-            
+
             <button className="ghost-btn add-color-btn" onClick={handleAddColor}>
               + Add Marker
             </button>

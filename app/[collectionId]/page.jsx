@@ -7,7 +7,8 @@ import { collections } from '../content';
 import AuthButton from '../../components/AuthButton';
 import { auth } from '../../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { syncProgressToFirebase, getProgressFromFirebase } from '../../lib/db';
+import { syncProgressToFirebase, getProgressFromFirebase, toggleBookmark, getBookmarks } from '../../lib/db';
+import { useDrag } from '@use-gesture/react';
 
 const storageKeys = {
   collectionId: 'shri-harivansh.collectionId',
@@ -74,6 +75,7 @@ export default function ReaderPage() {
   const [fontSize, setFontSize] = useState(20);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [textAlign, setTextAlign] = useState('left');
+  const [bookmarkedKeys, setBookmarkedKeys] = useState(new Set());
 
   useEffect(() => {
     let initialSectionId = collection.sections[0].id;
@@ -119,6 +121,8 @@ export default function ReaderPage() {
           setSectionId(fbData.sectionId);
           setVerseNumber(fbData.verseNumber);
         }
+        const bms = await getBookmarks(currentUser);
+        setBookmarkedKeys(new Set(bms.map(b => `${b.collectionId}_${b.sectionId}_${b.verseNumber}`)));
       }
     });
     return () => unsubscribe();
@@ -148,6 +152,30 @@ export default function ReaderPage() {
   const isLastVerse =
     sectionId === collection.sections[collection.sections.length - 1].id &&
     verseIndex === section.verses.length - 1;
+
+  const currentBookmarkKey = `${collection.id}_${sectionId}_${verseNumber}`;
+
+  const handleToggleBookmark = async () => {
+    if (!user) return;
+    const newState = !bookmarkedKeys.has(currentBookmarkKey);
+    
+    setBookmarkedKeys(prev => {
+      const next = new Set(prev);
+      if (newState) next.add(currentBookmarkKey);
+      else next.delete(currentBookmarkKey);
+      return next;
+    });
+
+    await toggleBookmark(user, collection.id, sectionId, verseNumber, newState);
+  };
+
+  const bindGestures = useDrag(({ swipe: [swipeX] }) => {
+    if (swipeX === -1) {
+      if (!isLastVerse) moveVerse(1);
+    } else if (swipeX === 1) {
+      if (!isFirstVerse) moveVerse(-1);
+    }
+  }, { axis: 'x' });
 
   function moveVerse(direction) {
     const nextIndex = verseIndex + direction;
@@ -292,8 +320,19 @@ export default function ReaderPage() {
             </div>
           )}
 
-          <article className="verse-card">
-            <p className="verse-number">Verse {verse.number}</p>
+          <article className="verse-card" {...bindGestures()} style={{ touchAction: 'pan-y' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <p className="verse-number" style={{ margin: 0 }}>Verse {verse.number}</p>
+              <button 
+                type="button" 
+                className="ghost-btn" 
+                onClick={handleToggleBookmark}
+                title={bookmarkedKeys.has(currentBookmarkKey) ? "Remove bookmark" : "Bookmark this verse"}
+                style={{ padding: '0px 8px', fontSize: '1.25rem', color: bookmarkedKeys.has(currentBookmarkKey) ? '#d4af37' : 'inherit' }}
+              >
+                {bookmarkedKeys.has(currentBookmarkKey) ? '★' : '☆'}
+              </button>
+            </div>
             {verse.hindiShloka ? (
               <div className="rsn-verse" style={{ textAlign }}>
                 <div className="rsn-section rsn-hindi">

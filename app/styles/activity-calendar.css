@@ -16,7 +16,8 @@
 
 .calendar-nav {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
   gap: 12px;
   margin-bottom: 2px;
 }
@@ -32,7 +33,7 @@
 .calendar-border {
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  /* overflow: hidden; removed to prevent popups from clipping */
 }
 
 .calendar-classic-grid {
@@ -53,6 +54,7 @@
 .calendar-classic-header {
   background: var(--accent-subtle);
   border-bottom: 1px solid var(--border-primary);
+  border-radius: calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0 0;
 }
 
 .calendar-classic-col {
@@ -115,7 +117,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .calendar-color-picker {
@@ -175,11 +177,13 @@
   align-items: flex-start;
   margin-top: 16px;
 }
+
 @media (max-width: 800px) {
   .calendar-layout {
     flex-direction: column;
   }
 }
+
 .calendar-border {
   flex: 1;
   min-width: 0;
@@ -330,12 +334,10 @@
   font-size: 0.7rem;
 }
 
-/* Navigation & Date Jumper */
-.calendar-month-jump {
+.calendar-month-nav {
   display: flex;
   align-items: center;
   gap: 16px;
-  flex-wrap: wrap;
   justify-content: center;
 }
 

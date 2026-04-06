@@ -18,6 +18,7 @@
   .quote-shimmer {
     height: 160px;
   }
+
   .app-shell {
     width: calc(100% - 24px);
     padding: 20px 0 40px;
@@ -103,9 +104,36 @@
     font-size: 0.82rem;
   }
 
-  h1 { font-size: 1.8rem; }
-  h2 { font-size: 1.35rem; }
-  h3 { font-size: 1.1rem; }
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  h2 {
+    font-size: 1.35rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  .calendar-border {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .calendar-classic-grid {
+    min-width: 280px; 
+  }
+
+  .calendar-date-picker {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .calendar-jump-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 
   .section-divider {
     padding: 0;
@@ -116,4 +144,3 @@
     border-radius: var(--radius-lg);
   }
 }
-
