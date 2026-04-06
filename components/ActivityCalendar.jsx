@@ -5,7 +5,7 @@ import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
   startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, subDays
 } from 'date-fns';
-import { getCalendarMarkers, setCalendarMarker, getCalendarColors, setCalendarColors } from '../lib/db';
+import { getCalendarMarkers, setCalendarMarker, getCalendarColors, setCalendarColors, getCalendarStartDate, setCalendarStartDate } from '../lib/db';
 import { auth } from '../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -40,8 +40,13 @@ export default function ActivityCalendar() {
           setMarkers(prev => ({ ...parsed, ...prev })); // Inject instantly
         }
       }
+      const cachedStart = localStorage.getItem('shri-harivansh.calendar-start-date');
+      if (cachedStart) setCustomStartDate(cachedStart);
     } catch(e) {}
   }, []);
+
+  const [customStartDate, setCustomStartDate] = useState(null);
+  const [showStartPicker, setShowStartPicker] = useState(false);
 
   // Legend editing state
   const [editingLegendId, setEditingLegendId] = useState(null);
@@ -51,22 +56,28 @@ export default function ActivityCalendar() {
   const popupRef = useRef(null);
 
   // Compute Gamification Stats based precisely on active markers
-  const calculateStats = (markersObj) => {
+  const calculateStats = (markersObj, currentMonthDate, userStartStr) => {
     const dates = Object.keys(markersObj)
       .filter(date => markersObj[date] && markersObj[date].length > 0 && !markersObj[date].includes('clear'))
-      .sort((a, b) => new Date(b) - new Date(a));
+      .sort((a, b) => new Date(a) - new Date(b));
       
     const totalDays = dates.length;
     let currentStreak = 0;
-    
+    let totalMissed = 0;
+    let missedInMonth = 0;
+    let missedDatesInMonth = [];
+
+    const today = new Date();
+    const todayStr = format(today, 'yyyy-MM-dd');
+
     if (dates.length > 0) {
-      const today = new Date();
-      const todayStr = format(today, 'yyyy-MM-dd');
+      // reverse sorting to count streaks backwards from today
+      const sortedBackwards = [...dates].reverse();
       const yesterdayStr = format(subDays(today, 1), 'yyyy-MM-dd');
       
       let checkStr = null;
-      if (dates.includes(todayStr)) checkStr = todayStr;
-      else if (dates.includes(yesterdayStr)) checkStr = yesterdayStr;
+      if (sortedBackwards.includes(todayStr)) checkStr = todayStr;
+      else if (sortedBackwards.includes(yesterdayStr)) checkStr = yesterdayStr;
       
       if (checkStr) {
         currentStreak = 1;
@@ -74,7 +85,7 @@ export default function ActivityCalendar() {
         while (true) {
           currentIterDate = subDays(currentIterDate, 1);
           const nextStr = format(currentIterDate, 'yyyy-MM-dd');
-          if (dates.includes(nextStr)) {
+          if (sortedBackwards.includes(nextStr)) {
             currentStreak++;
           } else {
             break;
@@ -82,18 +93,65 @@ export default function ActivityCalendar() {
         }
       }
     }
-    return { currentStreak, totalDays };
+
+    // Calculate total missed days from the start of the first tracked month up to today
+    const startRefStr = userStartStr || (dates.length > 0 ? dates[0] : null);
+    if (startRefStr) {
+      const firstTrackedDate = new Date(startRefStr + 'T00:00:00');
+      const fd = userStartStr ? firstTrackedDate : startOfMonth(firstTrackedDate);
+      const endD = new Date(todayStr + 'T00:00:00');
+      
+      if (fd <= endD) {
+        const allDaysSinceStart = eachDayOfInterval({ start: fd, end: endD });
+        allDaysSinceStart.forEach(d => {
+          const dStr = format(d, 'yyyy-MM-dd');
+          const m = markersObj[dStr] || [];
+          const isMissed = (m.length === 0 || m.includes('clear')) || m.includes('rose');
+          if (isMissed) {
+            totalMissed++;
+          }
+        });
+      }
+    }
+
+    // Calculate Missed in Month strictly from 1st of month to today (or end of month if in past)
+    let monthMissedStart = startOfMonth(currentMonthDate);
+    if (userStartStr) {
+      const uStartD = new Date(userStartStr + 'T00:00:00');
+      if (uStartD > monthMissedStart) monthMissedStart = uStartD;
+    }
+    
+    let monthMissedEnd = endOfMonth(currentMonthDate);
+    if (monthMissedEnd > today) {
+      monthMissedEnd = today;
+    }
+    
+    if (monthMissedStart <= monthMissedEnd) {
+      const daysInMonthToDate = eachDayOfInterval({ start: monthMissedStart, end: monthMissedEnd });
+      daysInMonthToDate.forEach(d => {
+        const dStr = format(d, 'yyyy-MM-dd');
+        const m = markersObj[dStr] || [];
+        const isMissed = (m.length === 0 || m.includes('clear')) || m.includes('rose');
+        if (isMissed) {
+          missedInMonth++;
+          missedDatesInMonth.push(format(d, 'do'));
+        }
+      });
+    }
+
+    return { currentStreak, totalDays, totalMissed, missedInMonth, missedDatesInMonth };
   };
 
-  const { currentStreak, totalDays } = calculateStats(markers);
+  const { currentStreak, totalDays, totalMissed, missedInMonth, missedDatesInMonth } = calculateStats(markers, currentDate, customStartDate);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
-        const [markerData, colorsData] = await Promise.all([
+        const [markerData, colorsData, startData] = await Promise.all([
           getCalendarMarkers(u),
-          getCalendarColors(u)
+          getCalendarColors(u),
+          getCalendarStartDate(u)
         ]);
         
         // Offline-first PWA architecture: Merge cloud state down without wiping local interactions
@@ -105,6 +163,11 @@ export default function ActivityCalendar() {
         
         if (colorsData && colorsData.length > 0) {
           setMarkerColors(colorsData);
+        }
+        
+        if (startData) {
+          setCustomStartDate(startData);
+          localStorage.setItem('shri-harivansh.calendar-start-date', startData);
         }
       }
       setLoading(false);
@@ -236,8 +299,49 @@ export default function ActivityCalendar() {
               <span>🔥</span> {currentStreak} Day Streak
             </div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '24px', background: 'var(--bg-inset)', border: '1px solid var(--border-primary)', fontSize: '0.78rem', fontWeight: '500', color: 'var(--text-secondary)' }}>
-              <span>✨</span> {totalDays} Total Focus Days
+              <span>✨</span> {totalDays} Total Tracked
             </div>
+            <div 
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '24px', background: 'var(--bg-inset)', border: '1px solid var(--border-primary)', fontSize: '0.78rem', fontWeight: '500', color: 'var(--text-secondary)', cursor: 'pointer', position: 'relative' }}
+              onClick={() => setShowStartPicker(!showStartPicker)}
+              title="Click to set custom start date"
+            >
+              <span>🥀</span> {totalMissed} Total Missed
+              
+              {showStartPicker && (
+                <div style={{ position: 'absolute', top: '100%', left: '0', marginTop: '8px', padding: '12px', background: 'var(--bg-body)', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-md)', zIndex: 100, boxShadow: 'var(--shadow-md)', width: 'max-content' }} onClick={(e) => e.stopPropagation()}>
+                  <p style={{ margin: '0 0 8px 0', fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Count missed days starting from:</p>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input 
+                      type="date"
+                      value={customStartDate || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCustomStartDate(val);
+                        localStorage.setItem('shri-harivansh.calendar-start-date', val);
+                        setCalendarStartDate(user, val);
+                      }}
+                      style={{ padding: '6px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-secondary)', background: 'var(--bg-inset)', color: 'var(--text-primary)', outline: 'none' }}
+                    />
+                    {customStartDate && (
+                      <button className="ghost-btn tiny-btn" onClick={() => {
+                        setCustomStartDate(null);
+                        localStorage.removeItem('shri-harivansh.calendar-start-date');
+                        setCalendarStartDate(user, null);
+                      }} title="Clear custom start date" style={{ padding: '4px' }}>✕</button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '24px', background: missedInMonth > 0 ? '#2c1e1e' : 'var(--bg-inset)', border: missedInMonth > 0 ? '1px solid #5a3535' : '1px solid var(--border-primary)', fontSize: '0.78rem', fontWeight: '500', color: missedInMonth > 0 ? '#df8e8e' : 'var(--text-secondary)', boxShadow: missedInMonth > 0 ? 'var(--shadow-xs)' : 'none' }}>
+              <span>⚠️</span> {missedInMonth} Missed in {mounted ? format(currentDate, 'MMM') : ''}
+            </div>
+            {missedInMonth > 0 && (
+              <div style={{ width: '100%', fontSize: '0.7rem', color: 'var(--text-tertiary)', paddingLeft: '8px', lineHeight: '1.4' }}>
+                <strong style={{ fontWeight: 600 }}>Missed Dates:</strong> {missedDatesInMonth.join(', ')}
+              </div>
+            )}
           </div>
         </div>
         <div className="calendar-nav" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%', marginBottom: '16px' }}>
