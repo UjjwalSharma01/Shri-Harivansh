@@ -77,6 +77,8 @@ export default function ReaderPage() {
   const [textAlign, setTextAlign] = useState('left');
   const [bookmarkedKeys, setBookmarkedKeys] = useState(new Set());
   const wakeLockRef = useRef(null);
+  const audioRef = useRef(null);
+  const [shouldAutoPlayNext, setShouldAutoPlayNext] = useState(false);
 
   useEffect(() => {
     let initialSectionId = collection.sections[0].id;
@@ -239,6 +241,30 @@ export default function ReaderPage() {
     }
   }
 
+  // Audio Seamless Continuation logic
+  const handleAudioEnded = () => {
+    const currentSectionIndex = collection.sections.findIndex(s => s.id === sectionId);
+    if (currentSectionIndex >= 0 && currentSectionIndex < collection.sections.length - 1) {
+      setShouldAutoPlayNext(true);
+      const nextSection = collection.sections[currentSectionIndex + 1];
+      setSectionId(nextSection.id);
+      setVerseNumber(nextSection.verses[0].number);
+    }
+  };
+
+  useEffect(() => {
+    if (shouldAutoPlayNext && audioRef.current) {
+      // Small timeout to guarantee browser has loaded the new src before invoking play()
+      const playPromise = setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.play().catch(e => console.log('Autoplay blocked by browser policy:', e));
+        }
+      }, 150);
+      setShouldAutoPlayNext(false);
+      return () => clearTimeout(playPromise);
+    }
+  }, [section.audioUrl, shouldAutoPlayNext]);
+
   const hasYouTube = collection.youtubeIds && collection.youtubeIds.length > 0;
   const hasAudio = section.audioUrl && section.audioUrl.length > 0;
 
@@ -349,13 +375,13 @@ export default function ReaderPage() {
           {hasAudio && hasYouTube && (
             <Expandable label="🔊  Listen Audio" defaultOpen={false} storageKey="shri-harivansh.audioOpen">
               <div className="audio-wrap">
-                <audio controls preload="none" src={encodeURI(section.audioUrl)} key={section.audioUrl} />
+                <audio ref={audioRef} controls preload="none" src={encodeURI(section.audioUrl)} key={section.audioUrl} onEnded={handleAudioEnded} />
               </div>
             </Expandable>
           )}
           {hasAudio && !hasYouTube && (
             <div className="audio-wrap">
-              <audio controls preload="none" src={encodeURI(section.audioUrl)} key={section.audioUrl} />
+              <audio ref={audioRef} controls preload="none" src={encodeURI(section.audioUrl)} key={section.audioUrl} onEnded={handleAudioEnded} />
             </div>
           )}
 
