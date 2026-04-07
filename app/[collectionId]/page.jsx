@@ -542,7 +542,7 @@ export default function ReaderPage() {
               <button
                 className="ghost-btn"
                 type="button"
-                onClick={() => setFontSize(v => Math.min(30, v + 2))}
+                onClick={() => setFontSize(v => Math.min(40, v + 2))}
               >
                 A+
               </button>
