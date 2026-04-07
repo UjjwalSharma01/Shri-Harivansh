@@ -564,6 +564,11 @@ export default function ReaderPage() {
             </div>
           </div>
 
+          <div className="reader-meta">
+            <span>Section {section.id}</span>
+            <span>{verse.number} of {collection.totalVerses}</span>
+          </div>
+
           {/* YouTube Video — expandable */}
           {hasYouTube && (
             <Expandable label="▶  Watch Video" defaultOpen={false} storageKey="shri-harivansh.youtubeOpen">
