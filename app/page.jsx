@@ -9,6 +9,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { getBookmarks } from '../lib/db';
 import DailyQuote from '../components/DailyQuote';
 import ActivityCalendar from '../components/ActivityCalendar';
+import NaamJap from '../components/NaamJap';
 
 const storageKeys = {
   collectionId: 'shri-harivansh.collectionId',
@@ -164,6 +165,12 @@ export default function HomePage() {
             </section>
           </>
         )}
+
+        <div className="section-divider">
+          <span>Focus</span>
+        </div>
+
+        <NaamJap />
 
         <div className="section-divider">
           <span>Collections</span>
